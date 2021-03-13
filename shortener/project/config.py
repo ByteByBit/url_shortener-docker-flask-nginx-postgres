@@ -1,3 +1,4 @@
+import os
 from os import environ, path
 from dotenv import load_dotenv
 
@@ -14,3 +15,4 @@ class Config(object):
     SQL_PORT = environ.get("SQL_PORT")
     DATABASE = environ.get("DATABASE")
     APP_FOLDER = environ.get("APP_FOLDER")
+    SECRET_KEY = os.urandom(32)

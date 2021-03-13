@@ -15,7 +15,7 @@ def create_app():
     with app.app_context():
 
         # Register blueprint.
-        from project.routes import route as route_bp
+        from project.routes import route_bp
         app.register_blueprint(route_bp)
 
         # Set up DB.

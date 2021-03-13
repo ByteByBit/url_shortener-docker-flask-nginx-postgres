@@ -1,49 +1,23 @@
-import os
-from flask import (
-    Flask,
-    jsonify,
-    send_from_directory,
-    request,
-    redirect,
-    url_for,
-    render_template
-)
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from project.models import InsertURL, Shortener_Form
+
+db = SQLAlchemy()
 
 
-app = Flask(__name__)
-app.config.from_object("project.config.Config")
-db = SQLAlchemy(app)
+def create_app():
+    ''' Create Flask app. '''
 
+    app = Flask(__name__)
 
-@app.route("/shortener", methods=["GET", "POST"])
-def shortener():
-    '''
-    Shortener service.
-    [GET] -> Shortener form.
-    [POST] -> Shorten the URL submitted with the form.
-    '''
+    app.config.from_object('project.config.Config')
+    db.init_app(app)
+    with app.app_context():
 
-    # POST form.
-    if request.method == "POST":
+        # Register blueprint.
+        from project.routes import shortener_bp
+        app.register_blueprint(shortener_bp)
 
-        url = request.form.get('url')
+        # DB initialized at the router service.
 
-        # Submitted URL is empty.
-        if not url:
-            return render_template('error.html')
-
-        insert = InsertURL()
-        id = insert.insert(url)
-
-        if id == -1:
-            return render_template('error.html')
-
-        new_url = insert.result(id)
-        
-        return render_template('success.html', new_url=new_url)
-
-    form = Shortener_Form()
-    return render_template('shortener.html', form=form)
+        return app

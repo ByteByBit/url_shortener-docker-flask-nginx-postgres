@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField
+from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
 from project import db
@@ -8,7 +8,7 @@ from project import db
 class InsertURL:
     def insert(self, url):
         try:
-            row = URLS.query.order_by(db.desc('index')).first()
+            row = URI_Table.query.order_by(db.desc('index')).first()
             index = row.index
             if index is None:
                 index = 0
@@ -17,7 +17,7 @@ class InsertURL:
 
             new_url = get_page_id(index=index)
 
-            db.session.add(URLS(url=url, s_url=new_url, index=index))
+            db.session.add(URI_Table(url=url, s_url=new_url, index=index))
             db.session.commit()
             return new_url
         except:
@@ -28,7 +28,11 @@ class InsertURL:
         return base_url + id
 
 
-class URLS(db.Model):
+class URI_Table(db.Model):
+    '''
+    url table.
+    | ID (INT) | ORIGINAL_URL (STRING)| SHORT_URL (STRING)| INDEX (INT)|
+    '''
     __tablename__ = "url"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -36,7 +40,7 @@ class URLS(db.Model):
     short_url = db.Column(db.String(16), default=True, nullable=False)
     index = db.Column(db.Integer)
 
-    def __init__(self, url, s_url, index):
+    def __init__(self, url: str, s_url: str, index: int):
         self.original_url = url
         self.short_url = s_url
         self.index = index
@@ -60,6 +64,7 @@ def get_page_id(index: int):
         m = index % CHARS_LEN
 
     return CHARS[m] + result
+
 
 class Shortener_Form(FlaskForm):
     url = StringField('URL', validators=[DataRequired()])

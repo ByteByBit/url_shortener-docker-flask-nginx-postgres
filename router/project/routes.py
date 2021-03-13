@@ -2,11 +2,11 @@ from flask import Blueprint, render_template, redirect
 
 from project.models import URI_Table
 
-route = Blueprint('route', __name__)
+route_bp = Blueprint('route_bp', __name__)
 
 
-@route.route('/', defaults={'path': ''}, methods=['GET'])
-@route.route('/<path:path>', methods=['GET'])
+@route_bp.route('/', defaults={'path': ''}, methods=['GET'])
+@route_bp.route('/<path:path>', methods=['GET'])
 def redirect_to_original(path):
 
     # ID not specified.

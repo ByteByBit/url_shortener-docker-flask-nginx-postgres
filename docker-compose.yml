@@ -8,7 +8,7 @@ services:
     expose:
       - 5000
     env_file:
-      - ./.env.router.prod
+      - ./router/.env
     environment:
       FLASK_DEBUG: 1
       FLASK_APP: /home/url/router/server.py
@@ -19,11 +19,13 @@ services:
     build:
       context: ./shortener
       dockerfile: Dockerfile.prod
-    command: gunicorn --bind 0.0.0.0:5001 manage:app 
+    environment:
+      FLASK_DEBUG: 1
+      FLASK_APP: /home/url/router/server.py
     expose:
       - 5001
     env_file:
-      - ./.env.shortener.prod
+      - ./shortener/.env
     depends_on:
       - db
 
