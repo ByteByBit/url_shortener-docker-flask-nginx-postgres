@@ -1,0 +1,19 @@
+<!doctype html>
+
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>URL Shortener example</title>
+    </head>
+    <body>
+        <h1>URL Shortener example</h1>
+        <form action="" method="post" novalidate>
+            <p>
+                {{ form.url.label }}<br>
+                {{ form.url() }}
+            </p>
+            <p>{{ form.submit() }}</p>
+        </form>
+    </body>
+</html>

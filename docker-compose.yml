@@ -1,0 +1,47 @@
+version: '3.7'
+
+services:
+  router:
+    build:
+      context: ./router
+      dockerfile: Dockerfile.prod
+    expose:
+      - 5000
+    env_file:
+      - ./.env.router.prod
+    environment:
+      FLASK_DEBUG: 1
+      FLASK_APP: /home/url/router/server.py
+    depends_on:
+      - db
+
+  shortener:
+    build:
+      context: ./shortener
+      dockerfile: Dockerfile.prod
+    command: gunicorn --bind 0.0.0.0:5001 manage:app 
+    expose:
+      - 5001
+    env_file:
+      - ./.env.shortener.prod
+    depends_on:
+      - db
+
+  db:
+    image: postgres:12-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.prod.db
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 1338:80
+      - 1339:8080
+    depends_on:
+      - router
+      - shortener
+
+volumes:
+  postgres_data:

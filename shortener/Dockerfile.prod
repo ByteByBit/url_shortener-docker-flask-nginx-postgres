@@ -1,0 +1,71 @@
+###########
+# BUILDER #
+###########
+
+# pull official base image
+FROM python:3.8.1-slim-buster as builder
+
+# set work directory
+WORKDIR /usr/src/url
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc
+
+# lint
+RUN pip install --upgrade pip
+RUN pip install flake8
+COPY . /usr/src/url/
+RUN flake8 --ignore=E501,F401,E402,E722 .
+
+# install python dependencies
+COPY ./requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/url/wheels -r requirements.txt
+
+
+#########
+# FINAL #
+#########
+
+# pull official base image
+FROM python:3.8.1-slim-buster
+
+# create directory for the url user
+RUN mkdir -p /home/url
+
+# create the url user
+RUN addgroup --system url && adduser --system --group url
+
+
+# create the appropriate directories
+ENV HOME=/home/url
+ENV URL_HOME=/home/url/shortener
+ENV DB=postgres
+RUN mkdir $URL_HOME
+WORKDIR $URL_HOME
+
+# install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends netcat
+COPY --from=builder /usr/src/url/wheels /wheels
+COPY --from=builder /usr/src/url/requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install --no-cache /wheels/*
+
+# copy entrypoint.sh
+COPY ./entrypoint.sh $URL_HOME
+
+# copy project
+COPY . $URL_HOME
+
+# chown all the files to the url user
+RUN chown -R url:url $URL_HOME
+
+# change to the app user
+USER url
+
+# run entrypoint.sh
+ENTRYPOINT ["/home/url/shortener/entrypoint.sh"]
